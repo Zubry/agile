@@ -39,7 +39,7 @@ defmodule PointingSession.Server do
 
   def handle_call({:vote, user, points}, _from, pointing_session) do
     case PointingSession.Core.vote(pointing_session, user, points) do
-      {:ok, pointing_session} -> {:reply, pointing_session, pointing_session}
+      {:ok, pointing_session} -> {:reply, {:ok, pointing_session}, pointing_session}
       {:error, message} -> {:reply, {:error, message}, pointing_session}
     end
   end
