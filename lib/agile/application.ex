@@ -9,6 +9,8 @@ defmodule Agile.Application do
     children = [
       # Starts a worker by calling: Agile.Worker.start_link(arg)
       # {Agile.Worker, arg}
+      {Registry, keys: :unique, name: PointingSession.Registry},
+      {DynamicSupervisor, name: PointingSession.DynamicSupervisor, strategy: :one_for_one}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
