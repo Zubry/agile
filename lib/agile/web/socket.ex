@@ -44,6 +44,17 @@ defmodule Web.Socket do
     {:ok, id, :hibernate}
   end
 
+  # If the connection terminates when the user is in a room, remove them
+  def websocket_terminate(_, _, {id, user}) do
+    PointingSession.leave(id, user)
+    :ok
+  end
+
+  # If they're not in a room, we don't need to do anything
+  def websocket_terminate(_, _, _) do
+    :ok
+  end
+
   defp make_id(bytes) do
       bytes
       |> :crypto.strong_rand_bytes()
