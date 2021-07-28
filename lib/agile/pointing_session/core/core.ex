@@ -12,7 +12,8 @@ defmodule PointingSession.Core do
   end
 
   def leave(pointing_session, user) do
-    update_in(pointing_session.users, fn users -> Users.leave(users, user) end)
+    pointing_session = update_in(pointing_session.users, fn users -> Users.leave(users, user) end)
+    update_in(pointing_session.votes, fn votes -> Votes.remove_vote(votes, user) end)
   end
 
   def vote(pointing_session, user, points) do
