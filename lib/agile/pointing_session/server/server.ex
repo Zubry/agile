@@ -1,14 +1,18 @@
 defmodule PointingSession.Server do
-  use GenServer
+  use GenServer, restart: :transient
+
+  # After 60 minutes without receiving a message, the server should shut down
+  @timeout 1 * 60 * 1000
 
   def start_link(id: id) do
     GenServer.start_link(__MODULE__, id, name: {:via, Registry, {PointingSession.Registry, id}})
   end
 
   def init(id) do
-    {:ok, PointingSession.Core.new(id)}
+    {:ok, PointingSession.Core.new(id), @timeout}
   end
 
+  @spec join(atom | pid | {atom, any} | {:via, atom, any}, any) :: any
   def join(pid, user) do
     GenServer.call(pid, {:join, user})
   end
@@ -32,7 +36,7 @@ defmodule PointingSession.Server do
 
     dispatch(pointing_session)
 
-    {:reply, pointing_session, pointing_session}
+    {:reply, pointing_session, pointing_session, @timeout}
   end
 
   def handle_call({:leave, user}, _from, pointing_session) do
@@ -40,15 +44,15 @@ defmodule PointingSession.Server do
 
     dispatch(pointing_session)
 
-    {:reply, pointing_session, pointing_session}
+    {:reply, pointing_session, pointing_session, @timeout}
   end
 
   def handle_call({:vote, user, points}, _from, pointing_session) do
     case PointingSession.Core.vote(pointing_session, user, points) do
       {:ok, pointing_session} ->
           dispatch(pointing_session)
-          {:reply, {:ok, pointing_session}, pointing_session}
-      {:error, message} -> {:reply, {:error, message}, pointing_session}
+          {:reply, {:ok, pointing_session}, pointing_session, @timeout}
+      {:error, message} -> {:reply, {:error, message}, pointing_session, @timeout}
     end
   end
 
@@ -57,7 +61,17 @@ defmodule PointingSession.Server do
 
     dispatch(pointing_session)
 
-    {:reply, pointing_session, pointing_session}
+    {:reply, pointing_session, pointing_session, @timeout}
+  end
+
+  def handle_info(:timeout, state) do
+    Registry.dispatch(PointingSession.Dispatcher, state.id, fn entries ->
+      for {pid, _} <- entries do
+        send(pid, :shutdown)
+      end
+    end)
+
+    {:stop, :normal, state}
   end
 
   defp dispatch(state) do

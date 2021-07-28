@@ -61,6 +61,10 @@ defmodule Web.Socket do
     {:reply, {:text, Jason.encode!(message)}, state}
   end
 
+  def websocket_info(:shutdown, _) do
+    {:reply, {:close, "shutdown"}, nil}
+  end
+
   # If the connection terminates when the user is in a room, remove them
   def terminate(_, _, {id, user}) do
     PointingSession.leave(id, user)
