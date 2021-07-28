@@ -29,23 +29,42 @@ defmodule PointingSession.Server do
 
   def handle_call({:join, user}, _from, pointing_session) do
     pointing_session = PointingSession.Core.join(pointing_session, user)
+
+    dispatch(pointing_session)
+
     {:reply, pointing_session, pointing_session}
   end
 
   def handle_call({:leave, user}, _from, pointing_session) do
     pointing_session = PointingSession.Core.leave(pointing_session, user)
+
+    dispatch(pointing_session)
+
     {:reply, pointing_session, pointing_session}
   end
 
   def handle_call({:vote, user, points}, _from, pointing_session) do
     case PointingSession.Core.vote(pointing_session, user, points) do
-      {:ok, pointing_session} -> {:reply, {:ok, pointing_session}, pointing_session}
+      {:ok, pointing_session} ->
+          dispatch(pointing_session)
+          {:reply, {:ok, pointing_session}, pointing_session}
       {:error, message} -> {:reply, {:error, message}, pointing_session}
     end
   end
 
   def handle_call({:clear_votes}, _from, pointing_session) do
     pointing_session = PointingSession.Core.clear_votes(pointing_session)
+
+    dispatch(pointing_session)
+
     {:reply, pointing_session, pointing_session}
+  end
+
+  defp dispatch(state) do
+    Registry.dispatch(PointingSession.Dispatcher, state.id, fn entries ->
+      for {pid, _} <- entries do
+        send(pid, {:broadcast, state})
+      end
+    end)
   end
 end

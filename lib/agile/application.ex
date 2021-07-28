@@ -11,6 +11,7 @@ defmodule Agile.Application do
       # {Agile.Worker, arg}
       {Registry, keys: :unique, name: PointingSession.Registry},
       {DynamicSupervisor, name: PointingSession.DynamicSupervisor, strategy: :one_for_one},
+      {Registry, keys: :duplicate, name: PointingSession.Dispatcher},
       Plug.Cowboy.child_spec(scheme: :http, plug: Web.Router, options: [port: 4040, dispatch: dispatch()])
     ]
 

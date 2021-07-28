@@ -1,6 +1,7 @@
 defmodule Web.Socket do
   def init(req, _opts) do
-    {:cowboy_websocket, req, nil}
+    # Start the socket with a timeout of 60 minutes, since people often take long breaks during sprint planning
+    {:cowboy_websocket, req, nil, %{ idle_timeout: 60 * 60 * 1000}}
   end
 
   def websocket_init(nil) do
@@ -18,13 +19,19 @@ defmodule Web.Socket do
     {:reply, {:text, id}, nil}
   end
 
-  def handle_command(["join", id, user], _) do
+  def handle_command(["join", id, user], nil) do
+    Registry.register(PointingSession.Dispatcher, id, user)
+
     PointingSession.join(id, user)
+
     {:reply, {:text, "ok"}, {id, user}}
   end
 
   def handle_command(["leave"], {id, user}) do
     PointingSession.leave(id, user)
+
+    Registry.unregister(PointingSession.Dispatcher, id)
+
     {:reply, {:text, "ok"}, nil}
   end
 
@@ -44,14 +51,24 @@ defmodule Web.Socket do
     {:ok, id, :hibernate}
   end
 
+  # Handle Elixir (non-websocket) messages
+  # In the future, this will handle pub-sub info
+  def websocket_info({:broadcast, message}, state) do
+    # Encode the message as JSON
+    # If there's some sort of issue transcoding it, the process will crash
+    # This makes sense since you can't reasonably use the pointing session
+    # if the data isn't serializable
+    {:reply, {:text, Jason.encode!(message)}, state}
+  end
+
   # If the connection terminates when the user is in a room, remove them
-  def websocket_terminate(_, _, {id, user}) do
+  def terminate(_, _, {id, user}) do
     PointingSession.leave(id, user)
     :ok
   end
 
   # If they're not in a room, we don't need to do anything
-  def websocket_terminate(_, _, _) do
+  def terminate(_, _, _) do
     :ok
   end
 
@@ -59,5 +76,21 @@ defmodule Web.Socket do
       bytes
       |> :crypto.strong_rand_bytes()
       |> Base.url_encode64(padding: false)
+  end
+
+  # To be extra safe, explicitly describe how Elixir data types
+  # should be encoded to JSON
+  # In our case, we want to encode structs as maps (which are then encoded as objects)
+  # and MapSets as lists (which become arrays)
+  defimpl Jason.Encoder, for: [PointingSession.Core] do
+    def encode(struct, opts) do
+      Jason.Encode.map(Map.from_struct(struct), opts)
+    end
+  end
+
+  defimpl Jason.Encoder, for: [MapSet, Range, Stream] do
+    def encode(struct, opts) do
+      Jason.Encode.list(Enum.to_list(struct), opts)
+    end
   end
 end
