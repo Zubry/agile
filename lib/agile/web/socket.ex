@@ -82,15 +82,15 @@ defmodule Web.Socket do
   # should be encoded to JSON
   # In our case, we want to encode structs as maps (which are then encoded as objects)
   # and MapSets as lists (which become arrays)
-  defimpl Jason.Encoder, for: [PointingSession.Core] do
-    def encode(struct, opts) do
-      Jason.Encode.map(Map.from_struct(struct), opts)
-    end
-  end
-
   defimpl Jason.Encoder, for: [MapSet, Range, Stream] do
     def encode(struct, opts) do
       Jason.Encode.list(Enum.to_list(struct), opts)
+    end
+  end
+
+  defimpl Jason.Encoder, for: [PointingSession.Core] do
+    def encode(struct, opts) do
+      Jason.Encode.map(Map.from_struct(struct), opts)
     end
   end
 end
