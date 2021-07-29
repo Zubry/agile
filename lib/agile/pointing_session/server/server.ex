@@ -2,7 +2,7 @@ defmodule PointingSession.Server do
   use GenServer, restart: :transient
 
   # After 60 minutes without receiving a message, the server should shut down
-  @timeout 1 * 60 * 1000
+  @timeout 60 * 60 * 1000
 
   def start_link(id: id) do
     GenServer.start_link(__MODULE__, id, name: {:via, Registry, {PointingSession.Registry, id}})
