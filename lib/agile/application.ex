@@ -12,7 +12,11 @@ defmodule Agile.Application do
       {Registry, keys: :unique, name: PointingSession.Registry},
       {DynamicSupervisor, name: PointingSession.DynamicSupervisor, strategy: :one_for_one},
       {Registry, keys: :duplicate, name: PointingSession.Dispatcher},
-      Plug.Cowboy.child_spec(scheme: :http, plug: Web.Router, options: [port: 4040, dispatch: dispatch()])
+      Plug.Cowboy.child_spec(
+        scheme: :http,
+        plug: Web.Router,
+        options: [port: 4040, dispatch: dispatch()]
+      )
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
@@ -23,10 +27,11 @@ defmodule Agile.Application do
 
   defp dispatch do
     [
-      {:_, [
-        {"/ws", Web.Socket, []},
-        {:_, Plug.Cowbow.Handler, {Web.Router, []}}
-      ]}
+      {:_,
+       [
+         {"/ws", Web.Socket, []},
+         {:_, Plug.Cowbow.Handler, {Web.Router, []}}
+       ]}
     ]
   end
 end

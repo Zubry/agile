@@ -1,7 +1,7 @@
 defmodule Web.Socket do
   def init(req, _opts) do
     # Start the socket with a timeout of 60 minutes, since people often take long breaks during sprint planning
-    {:cowboy_websocket, req, nil, %{ idle_timeout: 60 * 60 * 1000}}
+    {:cowboy_websocket, req, nil, %{idle_timeout: 60 * 60 * 1000}}
   end
 
   def websocket_init(nil) do
@@ -77,9 +77,9 @@ defmodule Web.Socket do
   end
 
   defp make_id(bytes) do
-      bytes
-      |> :crypto.strong_rand_bytes()
-      |> Base.url_encode64(padding: false)
+    bytes
+    |> :crypto.strong_rand_bytes()
+    |> Base.url_encode64(padding: false)
   end
 
   # To be extra safe, explicitly describe how Elixir data types

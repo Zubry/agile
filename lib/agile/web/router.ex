@@ -2,13 +2,13 @@ defmodule Web.Router do
   use Plug.Router
 
   # Apply logging middleware
-  plug Plug.Logger
+  plug(Plug.Logger)
 
   # Adds "match" functions to this piece of plug middleware
-  plug :match
+  plug(:match)
 
   # Executes matched code (from the match plug)
-  plug :dispatch
+  plug(:dispatch)
 
   get "/ping" do
     send_resp(conn, 200, "pong")
