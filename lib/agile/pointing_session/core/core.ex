@@ -7,6 +7,7 @@ defmodule PointingSession.Core do
     %__MODULE__{id: id}
   end
 
+  @spec join(map, any) :: map
   def join(pointing_session, user) do
     update_in(pointing_session.users, fn users -> Users.join(users, user) end)
   end

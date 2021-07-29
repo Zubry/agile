@@ -15,7 +15,7 @@ defmodule Agile.Application do
       Plug.Cowboy.child_spec(
         scheme: :http,
         plug: Web.Router,
-        options: [port: 4040, dispatch: dispatch()]
+        options: [port: Application.fetch_env!(:agile, :port), dispatch: dispatch()]
       )
     ]
 
