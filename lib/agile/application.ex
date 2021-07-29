@@ -30,7 +30,7 @@ defmodule Agile.Application do
       {:_,
        [
          {"/ws", Web.Socket, []},
-         {:_, Plug.Cowbow.Handler, {Web.Router, []}}
+         {:_, Plug.Cowboy.Handler, {Web.Router, []}}
        ]}
     ]
   end
