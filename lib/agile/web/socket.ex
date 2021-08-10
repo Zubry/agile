@@ -9,14 +9,19 @@ defmodule Web.Socket do
   end
 
   def websocket_handle({:text, text}, state) do
-    handle_command(String.split(text, ":"), state)
+    with [id | command] <- String.split(text, ":"),
+         {response, state} <- handle_command(command, state) do
+      {:reply, {:text, id <> ":" <> response}, state}
+    else
+      nil -> {:ok, state, :hibernate}
+    end
   end
 
   def handle_command(["start"], _) do
     id = make_id(8)
     PointingSession.start(id)
 
-    {:reply, {:text, id}, nil}
+    {id, nil}
   end
 
   def handle_command(["join", id, user], nil) do
@@ -24,7 +29,7 @@ defmodule Web.Socket do
 
     PointingSession.join(id, user)
 
-    {:reply, {:text, "ok"}, {id, user}}
+    {"ok", {id, user}}
   end
 
   def handle_command(["leave"], {id, user}) do
@@ -32,23 +37,23 @@ defmodule Web.Socket do
 
     Registry.unregister(PointingSession.Dispatcher, id)
 
-    {:reply, {:text, "ok"}, nil}
+    {"ok", nil}
   end
 
   def handle_command(["vote", points], {id, user}) do
     case PointingSession.vote(id, user, points) do
-      {:ok, _} -> {:reply, {:text, "ok"}, {id, user}}
-      _ -> {:reply, {:text, "error"}, {id, user}}
+      {:ok, _} -> {"ok", {id, user}}
+      _ -> {"error", {id, user}}
     end
   end
 
   def handle_command(["clear_votes"], {id, user}) do
     PointingSession.clear_votes(id)
-    {:reply, {:text, "ok"}, {id, user}}
+    {"ok", {id, user}}
   end
 
-  def handle_command(_, id) do
-    {:ok, id, :hibernate}
+  def handle_command(_, _) do
+    nil
   end
 
   # Handle Elixir (non-websocket) messages
