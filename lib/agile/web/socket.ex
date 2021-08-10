@@ -63,7 +63,7 @@ defmodule Web.Socket do
     # If there's some sort of issue transcoding it, the process will crash
     # This makes sense since you can't reasonably use the pointing session
     # if the data isn't serializable
-    {:reply, {:text, Jason.encode!(message)}, state}
+    {:reply, {:text, "update:" <> Jason.encode!(message)}, state}
   end
 
   def websocket_info(:shutdown, _) do
