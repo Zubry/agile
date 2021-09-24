@@ -45,18 +45,6 @@ defmodule Web.Socket do
     {"ok", nil}
   end
 
-  # def handle_command(["vote", points], {id, user}) do
-  #   case PointingSession.vote(id, user, points) do
-  #     {:ok, _} -> {"ok", {id, user}}
-  #     _ -> {"error", {id, user}}
-  #   end
-  # end
-
-  # def handle_command(["clear_votes"], {id, user}) do
-  #   PointingSession.clear_votes(id)
-  #   {"ok", {id, user}}
-  # end
-
   def handle_command(command, {id, user}) do
     case Room.forward(id, user, command) do
       {:ok, _} -> {"ok", {id, user}}
