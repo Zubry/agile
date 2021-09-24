@@ -53,7 +53,7 @@ defmodule Web.Socket do
   end
 
   def handle_command(_, _) do
-    {"error", "not recognized"}
+    nil
   end
 
   # Handle Elixir (non-websocket) messages
