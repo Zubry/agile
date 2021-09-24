@@ -3,11 +3,11 @@ defmodule PointingPoker do
     PointingPoker.Core.new()
   end
 
-  def handle_command({:join, _}, _, room) do
+  def join(_user, room) do
     room
   end
 
-  def handle_command({:leave, user}, _user, room) do
+  def leave(user, room) do
     PointingPoker.Core.leave(room, user)
   end
 

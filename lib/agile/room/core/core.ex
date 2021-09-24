@@ -11,6 +11,10 @@ defmodule Room.Core do
     Game.valid?(game)
   end
 
+  def game_module(game) do
+    Game.module(game)
+  end
+
   @spec join(map, any) :: map
   def join(room, user) do
     update_in(room.users, fn users -> Users.join(users, user) end)
