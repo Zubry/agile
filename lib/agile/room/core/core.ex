@@ -19,4 +19,10 @@ defmodule Room.Core do
   def leave(room, user) do
     update_in(room.users, fn users -> Users.leave(users, user) end)
   end
+
+  def forward(command, room) do
+    with module when module != nil <- Game.module(room.game) do
+      apply(module, :handle_command, [command, room])
+    end
+  end
 end

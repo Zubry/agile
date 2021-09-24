@@ -24,6 +24,7 @@ defmodule Room.Server do
 
   def handle_call({:join, user}, _from, room) do
     room = Room.Core.join(room, user)
+    room = Room.Core.forward({:join, user}, room)
 
     dispatch(room)
 

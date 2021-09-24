@@ -57,7 +57,6 @@ defmodule Web.Socket do
   # end
 
   def handle_command(command, state) do
-    IO.inspect({command, state})
     nil
   end
 
