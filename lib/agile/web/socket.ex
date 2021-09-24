@@ -17,11 +17,15 @@ defmodule Web.Socket do
     end
   end
 
-  def handle_command(["start"], _) do
+  def handle_command(["start", game], _) do
     id = make_id(8)
-    Room.start(id)
 
-    {id, nil}
+    case Room.start(id, game) do
+      {:error, _} ->
+        {"error", nil}
+      _ ->
+        {id, nil}
+    end
   end
 
   def handle_command(["join", id, user], nil) do
@@ -52,7 +56,8 @@ defmodule Web.Socket do
   #   {"ok", {id, user}}
   # end
 
-  def handle_command(_, _) do
+  def handle_command(command, state) do
+    IO.inspect({command, state})
     nil
   end
 

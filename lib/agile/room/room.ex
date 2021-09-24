@@ -1,9 +1,13 @@
 defmodule Room do
-  def start(id) do
-    DynamicSupervisor.start_child(
-      Room.DynamicSupervisor,
-      {Room.Server, id: id}
-    )
+  def start(id, game) do
+    if Room.Core.valid_game?(game) do
+      DynamicSupervisor.start_child(
+        Room.DynamicSupervisor,
+        {Room.Server, id: id, game: game}
+      )
+    else
+      {:error, :invalid_game}
+    end
   end
 
   def join(id, user) do

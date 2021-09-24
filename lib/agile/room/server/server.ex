@@ -4,12 +4,12 @@ defmodule Room.Server do
   # After 60 minutes without receiving a message, the server should shut down
   @timeout 60 * 60 * 1000
 
-  def start_link(id: id) do
-    GenServer.start_link(__MODULE__, id, name: {:via, Registry, {Room.Registry, id}})
+  def start_link(id: id, game: game) do
+    GenServer.start_link(__MODULE__, {id, game}, name: {:via, Registry, {Room.Registry, id}})
   end
 
-  def init(id) do
-    {:ok, Room.Core.new(id), @timeout}
+  def init({id, game}) do
+    {:ok, Room.Core.new(id, game), @timeout}
   end
 
   @spec join(atom | pid | {atom, any} | {:via, atom, any}, any) :: any

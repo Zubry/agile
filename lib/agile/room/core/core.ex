@@ -1,10 +1,14 @@
 defmodule Room.Core do
-  alias Room.Core.Users
+  alias Room.Core.{Game, Users}
 
-  defstruct id: nil, users: Users.new()
+  defstruct id: nil, users: Users.new(), game: nil
 
-  def new(id) do
-    %__MODULE__{id: id}
+  def new(id, game) do
+    %__MODULE__{id: id, game: game}
+  end
+
+  def valid_game?(game) do
+    Game.valid?(game)
   end
 
   @spec join(map, any) :: map
