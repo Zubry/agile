@@ -9,9 +9,9 @@ defmodule Agile.Application do
     children = [
       # Starts a worker by calling: Agile.Worker.start_link(arg)
       # {Agile.Worker, arg}
-      {Registry, keys: :unique, name: PointingSession.Registry},
-      {DynamicSupervisor, name: PointingSession.DynamicSupervisor, strategy: :one_for_one},
-      {Registry, keys: :duplicate, name: PointingSession.Dispatcher},
+      {Registry, keys: :unique, name: Room.Registry},
+      {DynamicSupervisor, name: Room.DynamicSupervisor, strategy: :one_for_one},
+      {Registry, keys: :duplicate, name: Room.Dispatcher},
       Plug.Cowboy.child_spec(
         scheme: :http,
         plug: Web.Router,

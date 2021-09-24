@@ -19,38 +19,38 @@ defmodule Web.Socket do
 
   def handle_command(["start"], _) do
     id = make_id(8)
-    PointingSession.start(id)
+    Room.start(id)
 
     {id, nil}
   end
 
   def handle_command(["join", id, user], nil) do
-    Registry.register(PointingSession.Dispatcher, id, user)
+    Registry.register(Room.Dispatcher, id, user)
 
-    PointingSession.join(id, user)
+    Room.join(id, user)
 
     {"ok", {id, user}}
   end
 
   def handle_command(["leave"], {id, user}) do
-    PointingSession.leave(id, user)
+    Room.leave(id, user)
 
-    Registry.unregister(PointingSession.Dispatcher, id)
+    Registry.unregister(Room.Dispatcher, id)
 
     {"ok", nil}
   end
 
-  def handle_command(["vote", points], {id, user}) do
-    case PointingSession.vote(id, user, points) do
-      {:ok, _} -> {"ok", {id, user}}
-      _ -> {"error", {id, user}}
-    end
-  end
+  # def handle_command(["vote", points], {id, user}) do
+  #   case PointingSession.vote(id, user, points) do
+  #     {:ok, _} -> {"ok", {id, user}}
+  #     _ -> {"error", {id, user}}
+  #   end
+  # end
 
-  def handle_command(["clear_votes"], {id, user}) do
-    PointingSession.clear_votes(id)
-    {"ok", {id, user}}
-  end
+  # def handle_command(["clear_votes"], {id, user}) do
+  #   PointingSession.clear_votes(id)
+  #   {"ok", {id, user}}
+  # end
 
   def handle_command(_, _) do
     nil
@@ -72,7 +72,7 @@ defmodule Web.Socket do
 
   # If the connection terminates when the user is in a room, remove them
   def terminate(_, _, {id, user}) do
-    PointingSession.leave(id, user)
+    Room.leave(id, user)
     :ok
   end
 
@@ -97,7 +97,7 @@ defmodule Web.Socket do
     end
   end
 
-  defimpl Jason.Encoder, for: [PointingSession.Core] do
+  defimpl Jason.Encoder, for: [Room.Core] do
     def encode(struct, opts) do
       Jason.Encode.map(Map.from_struct(struct), opts)
     end
