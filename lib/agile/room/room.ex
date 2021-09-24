@@ -22,6 +22,12 @@ defmodule Room do
     |> Room.Server.leave(user)
   end
 
+  def forward(id, user, command) do
+    id
+    |> lookup()
+    |> Room.Server.forward(user, command)
+  end
+
   defp lookup(id) do
     [{pid, _}] = Registry.lookup(Room.Registry, id)
     pid

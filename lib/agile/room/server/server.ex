@@ -22,9 +22,13 @@ defmodule Room.Server do
     GenServer.call(pid, {:leave, user})
   end
 
+  def forward(pid, user, command) do
+    GenServer.call(pid, {:forward, user, command})
+  end
+
   def handle_call({:join, user}, _from, room) do
     room = Room.Core.join(room, user)
-    room = Room.Core.forward({:join, user}, room)
+    room = Room.Core.forward({:join, user}, user, room)
 
     dispatch(room)
 
@@ -33,10 +37,21 @@ defmodule Room.Server do
 
   def handle_call({:leave, user}, _from, room) do
     room = Room.Core.leave(room, user)
+    room = Room.Core.forward({:leave, user}, user, room)
 
     dispatch(room)
 
     {:reply, room, room, @timeout}
+  end
+
+  def handle_call({:forward, user, command}, _from, room) do
+    case Room.Core.forward(command, user, room) do
+      {:ok, room} ->
+        dispatch(room)
+        {:reply, room, room, @timeout}
+      {:error, message} ->
+        {:reply, {:error, message}, room, @timeout}
+    end
   end
 
   def handle_info(:timeout, state) do

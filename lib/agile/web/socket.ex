@@ -23,6 +23,7 @@ defmodule Web.Socket do
     case Room.start(id, game) do
       {:error, _} ->
         {"error", nil}
+
       _ ->
         {id, nil}
     end
@@ -56,8 +57,12 @@ defmodule Web.Socket do
   #   {"ok", {id, user}}
   # end
 
-  def handle_command(command, state) do
-    nil
+  def handle_command(command, {id, user}) do
+    case Room.forward(id, user, command) do
+      {:ok, _} -> {"ok", {id, user}}
+      {:error, message} -> {message, {id, user}}
+      _ -> {"ok", {id, user}}
+    end
   end
 
   # Handle Elixir (non-websocket) messages
@@ -101,7 +106,7 @@ defmodule Web.Socket do
     end
   end
 
-  defimpl Jason.Encoder, for: [Room.Core] do
+  defimpl Jason.Encoder, for: [Room.Core, PointingPoker.Core] do
     def encode(struct, opts) do
       Jason.Encode.map(Map.from_struct(struct), opts)
     end

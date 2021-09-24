@@ -1,6 +1,12 @@
 defmodule Room.Core.Game do
   @games Application.fetch_env!(:agile, :games)
 
+  def new(game) do
+    with module when module != nil <- module(game) do
+      module.new()
+    end
+  end
+
   def valid?(game) do
     @games
     |> Enum.map(fn {_, name} -> name end)
