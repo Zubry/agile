@@ -65,6 +65,10 @@ defmodule Web.Socket do
     end
   end
 
+  def handle_command(_, _) do
+    nil
+  end
+
   # Handle Elixir (non-websocket) messages
   # In the future, this will handle pub-sub info
   def websocket_info({:broadcast, message}, state) do

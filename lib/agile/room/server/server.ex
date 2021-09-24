@@ -50,10 +50,8 @@ defmodule Room.Server do
 
   def handle_call({:forward, user, command}, _from, room) do
     case Room.Core.forward(command, user, room) do
-      {:ok, new_state} ->
-        if new_state != room do
-          dispatch(room)
-        end
+      {:ok, room} ->
+        dispatch(room)
 
         {:reply, room, room, @timeout}
       {:error, message} ->
