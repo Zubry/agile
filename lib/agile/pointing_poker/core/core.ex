@@ -1,7 +1,7 @@
 defmodule PointingPoker.Core do
   alias PointingPoker.Core.Votes
 
-  defstruct votes: Votes.new()
+  defstruct votes: Votes.new(), revealed: false
 
   def new() do
     %__MODULE__{}
@@ -23,6 +23,16 @@ defmodule PointingPoker.Core do
   end
 
   def clear_votes(room) do
-    {:ok, put_in(room.state.votes, Votes.new())}
+    room = put_in(room.state.votes, Votes.new())
+    room = put_in(room.state.revealed, false)
+    {:ok, room}
+  end
+
+  def reveal_votes(room) do
+    {:ok, put_in(room.state.revealed, true)}
+  end
+
+  def unreveal_votes(room) do
+    {:ok, put_in(room.state.revealed, false)}
   end
 end

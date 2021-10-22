@@ -19,6 +19,14 @@ defmodule PointingPoker do
     PointingPoker.Core.clear_votes(room)
   end
 
+  def handle_command(["reveal_votes"], _user, room) do
+    PointingPoker.Core.reveal_votes(room)
+  end
+
+  def handle_command(["unreveal_votes"], _user, room) do
+    PointingPoker.Core.unreveal_votes(room)
+  end
+
   def handle_command(_command, _user, state) do
     {:ok, state}
   end

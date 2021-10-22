@@ -59,12 +59,13 @@ defmodule Web.Socket do
 
   # Handle Elixir (non-websocket) messages
   # In the future, this will handle pub-sub info
-  def websocket_info({:broadcast, message}, state) do
+  def websocket_info({:broadcast, message}, {id, user}) do
     # Encode the message as JSON
     # If there's some sort of issue transcoding it, the process will crash
     # This makes sense since you can't reasonably use the pointing session
     # if the data isn't serializable
-    {:reply, {:text, "update:" <> Jason.encode!(message)}, state}
+    output = Map.put(message, :user, user)
+    {:reply, {:text, "update:" <> Jason.encode!(output)}, {id, user}}
   end
 
   def websocket_info(:shutdown, _) do
